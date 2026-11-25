@@ -3,6 +3,7 @@
 
 import { countFilled, FACE_COUNT, glyphFor } from "../model.js";
 import { solve } from "../solver.js";
+import { defaultFilters, matchesResult } from "../explore-filters.js";
 
 const WORDLIST_URL = "assets/words.txt";
 let wordsTextPromise = null;
@@ -36,10 +37,18 @@ export function initExploreView(ctx) {
   const resultsEl = document.getElementById("explore-results");
   const filtersEl = document.getElementById("explore-filters");
   const partialWarning = document.getElementById("explore-partial-warning");
+  const emptyEl = document.getElementById("explore-empty");
+  const countEl = document.getElementById("explore-count");
+  const minWordsEl = document.getElementById("filter-min-words");
+  const minLettersEl = document.getElementById("filter-min-letters");
+  const minTotalEl = document.getElementById("filter-min-total");
+  const symbolModeEl = document.getElementById("filter-symbol-mode");
+  const queryEl = document.getElementById("filter-query");
 
   let worker = null;
   let entries = [];
-  let filter = "all";
+  let shownEntries = [];
+  let filters = defaultFilters();
 
   ctx.onChange((inventory) => {
     partialWarning.hidden = countFilled(inventory) >= FACE_COUNT;
@@ -50,21 +59,41 @@ export function initExploreView(ctx) {
     cancelButton.disabled = !busy;
   }
 
-  function matchesFilter(entry) {
-    if (filter === "phrases") return entry.tokens.length >= 2;
-    if (filter === "words") return entry.tokens.length === 1;
-    return true;
+  function clampNumber(input, fallback) {
+    const min = Number(input.min);
+    const max = Number(input.max);
+    const value = Number(input.value);
+    if (!Number.isFinite(value)) return fallback;
+    return Math.min(max, Math.max(min, Math.trunc(value)));
+  }
+
+  function syncControlsToFilters() {
+    minWordsEl.value = String(filters.minWords);
+    minLettersEl.value = String(filters.minLettersPerWord);
+    minTotalEl.value = String(filters.minTotalLetters);
+    symbolModeEl.value = filters.symbolMode;
+    queryEl.value = filters.query;
+  }
+
+  function readFiltersFromControls() {
+    return {
+      minWords: clampNumber(minWordsEl, filters.minWords),
+      minLettersPerWord: clampNumber(minLettersEl, filters.minLettersPerWord),
+      minTotalLetters: clampNumber(minTotalEl, filters.minTotalLetters),
+      symbolMode: symbolModeEl.value,
+      query: queryEl.value,
+    };
   }
 
   function render() {
-    const shown = entries.filter(matchesFilter);
-    if (shown.length === 0) {
-      resultsEl.innerHTML = entries.length
-        ? '<p class="hint">Nothing matches this filter.</p>'
-        : "";
+    shownEntries = entries.filter((entry) => matchesResult(entry, filters));
+    countEl.textContent = `Showing ${shownEntries.length} of ${entries.length}`;
+    emptyEl.hidden = shownEntries.length > 0 || entries.length === 0;
+    if (shownEntries.length === 0) {
+      resultsEl.innerHTML = "";
       return;
     }
-    resultsEl.innerHTML = shown
+    resultsEl.innerHTML = shownEntries
       .map((entry, index) => {
         const count = entry.assignments >= 1000 ? "999+" : String(entry.assignments);
         return `
@@ -79,7 +108,7 @@ export function initExploreView(ctx) {
     for (const row of resultsEl.querySelectorAll(".result-row")) {
       const detail = row.nextElementSibling;
       const toggle = () => {
-        const entry = entries.filter(matchesFilter)[Number(row.dataset.index)];
+        const entry = shownEntries[Number(row.dataset.index)];
         const expanded = row.getAttribute("aria-expanded") === "true";
         if (expanded) {
           detail.hidden = true;
@@ -110,20 +139,32 @@ export function initExploreView(ctx) {
     }
   }
 
-  for (const chip of filtersEl.querySelectorAll("[data-filter]")) {
-    chip.addEventListener("click", () => {
-      filter = chip.dataset.filter;
-      for (const other of filtersEl.querySelectorAll("[data-filter]")) {
-        other.classList.toggle("chip-active", other === chip);
-      }
-      render();
-    });
+  function onFilterChange() {
+    filters = readFiltersFromControls();
+    render();
   }
+
+  function clearFilters() {
+    filters = defaultFilters();
+    syncControlsToFilters();
+    render();
+  }
+
+  for (const input of [minWordsEl, minLettersEl, minTotalEl, queryEl]) {
+    input.addEventListener("input", onFilterChange);
+  }
+  symbolModeEl.addEventListener("change", onFilterChange);
+  for (const button of document.querySelectorAll(".explore-clear-filters")) {
+    button.addEventListener("click", clearFilters);
+  }
+  syncControlsToFilters();
 
   runButton.addEventListener("click", async () => {
     setBusy(true);
     entries = [];
+    shownEntries = [];
     resultsEl.innerHTML = "";
+    emptyEl.hidden = true;
     filtersEl.hidden = true;
     status.textContent = "Loading word list…";
     let wordsText;

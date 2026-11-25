@@ -85,10 +85,49 @@
           </button>
           <span id="explore-status" class="status" role="status"></span>
         </div>
-        <div id="explore-filters" class="filter-row" hidden>
-          <button type="button" data-filter="all" class="chip chip-active">All</button>
-          <button type="button" data-filter="phrases" class="chip">Phrases</button>
-          <button type="button" data-filter="words" class="chip">Single words</button>
+        <div id="explore-filters" class="explore-filters" hidden>
+          <label class="filter-control">
+            <span>Min words</span>
+            <input id="filter-min-words" type="number" min="0" max="4" step="1" value="1" />
+          </label>
+          <label class="filter-control">
+            <span>Min letters/word</span>
+            <input id="filter-min-letters" type="number" min="1" max="16" step="1" value="3" />
+          </label>
+          <label class="filter-control">
+            <span>Min total letters</span>
+            <input id="filter-min-total" type="number" min="0" max="64" step="1" value="1" />
+          </label>
+          <label class="filter-control">
+            <span>Symbols</span>
+            <select id="filter-symbol-mode">
+              <option value="any">Any</option>
+              <option value="includes">Includes a symbol</option>
+              <option value="excludes">Excludes symbols</option>
+            </select>
+          </label>
+          <label class="filter-control filter-search">
+            <span>Search</span>
+            <input id="filter-query" type="text" placeholder="Filter text…" autocomplete="off" />
+          </label>
+          <button
+            id="explore-clear-filters"
+            class="button button-secondary explore-clear-filters"
+            type="button"
+          >
+            Clear filters
+          </button>
+          <span id="explore-count" class="filter-count" role="status"></span>
+        </div>
+        <div id="explore-empty" class="explore-empty" hidden>
+          <p class="hint">No results match these filters.</p>
+          <button
+            id="explore-empty-clear"
+            class="button button-secondary explore-clear-filters"
+            type="button"
+          >
+            Clear filters
+          </button>
         </div>
         <div id="explore-results"></div>
       </section>

@@ -257,19 +257,49 @@ main {
   color: var(--muted);
   font-style: italic;
 }
-.filter-row {
+.explore-filters {
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem 0.75rem;
   margin: 0.75rem 0 0.25rem;
 }
-.filter-row .chip {
-  cursor: pointer;
-  font: inherit;
+.explore-filters[hidden] {
+  display: none;
 }
-.filter-row .chip-active {
-  background: var(--green);
-  color: #fff;
-  border-color: var(--green);
+.filter-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.filter-control input,
+.filter-control select {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.45rem;
+}
+.filter-control input[type="number"] {
+  width: 4.5rem;
+}
+.filter-search {
+  flex: 1 1 10rem;
+}
+.filter-count {
+  margin-left: auto;
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.explore-empty {
+  text-align: center;
+  padding: 1.5rem 0 1rem;
 }
 
 .result-row {
