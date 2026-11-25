@@ -25,6 +25,8 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - name: Install OpenSpec
+        run: npm install --global @fission-ai/openspec@2
       - run: just ci
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6.0.0
       - name: Prepare site directory
