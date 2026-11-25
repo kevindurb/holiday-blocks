@@ -17,7 +17,7 @@ build:
     node scripts/check-assets.mjs
 
 test:
-    node --test test/
+    node --test
 
 pre-commit: fmt lint
 pre-push: build test
