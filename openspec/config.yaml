@@ -2,7 +2,23 @@ schema: spec-driven
 
 # Shown to AI when creating artifacts.
 context: |
-  TODO: replace this block when you start the project.
-  Cover the tech stack, what the project is, the real `just` commands, and the
-  conventions an agent must follow. Keep it short — detail belongs in
-  .agents/skills/.
+  A static web app ("Holiday Blocks") for a family's set of 16 physical
+  four-sided letter/symbol blocks. It records the faces of every block and
+  computes what the set can spell: a backtracking spell-checker and a
+  beam-search phrase enumerator over a bundled word list.
+
+  Stack: vanilla HTML/CSS/ES modules, no framework, no build step. Deployed
+  to GitHub Pages via .github/workflows/deploy-pages.yml. State lives in
+  localStorage (no backend). Tests use `node --test`; lint is eslint, format
+  check is prettier. Everything runs through `just`: `just ci` = fmt + lint +
+  build (asset sanity checks) + test + spec-validate.
+
+  Game rules: 16 blocks numbered 1-16, one face shown per block per phrase,
+  each block used at most once per phrase, one or two rows (layout is free).
+  Symbols (tree, shamrock, heart, four, pineapple, USA flag, flowers) are
+  literal single tokens; they never expand to words.
+
+  Conventions: ES modules; keep DOM code thin and logic in importable,
+  node-testable modules under src/. No new runtime dependencies without a
+  strong reason. The enumeration budget is deliberately capped; do not raise
+  beam width or wordlist size without measuring.

@@ -1,0 +1,9 @@
+node_modules/
+assets/words.txt
+.github/
+.opencode/
+openspec/
+docs/
+AGENTS.md
+REVIEW.md
+.agents/

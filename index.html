@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Holiday Blocks</title>
+    <meta
+      name="description"
+      content="Record the faces of the family's 16 holiday blocks and discover every word and phrase they can spell."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎄</text></svg>"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>🎄 Holiday Blocks</h1>
+      <p class="tagline">What can the blocks spell?</p>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" id="tab-blocks" aria-selected="true" data-view="view-blocks">
+        Blocks
+      </button>
+      <button role="tab" id="tab-spell" aria-selected="false" data-view="view-spell">
+        Spell it
+      </button>
+      <button role="tab" id="tab-explore" aria-selected="false" data-view="view-explore">
+        Explore
+      </button>
+    </nav>
+
+    <main>
+      <section id="view-blocks" role="tabpanel" aria-labelledby="tab-blocks">
+        <div id="inventory-summary" class="summary"></div>
+        <form id="inventory-form" autocomplete="off"></form>
+        <div class="toolbar">
+          <button type="button" id="export-button" class="button">Export JSON</button>
+          <label class="button button-secondary">
+            Import JSON…
+            <input type="file" id="import-input" accept="application/json,.json" hidden />
+          </label>
+          <button type="button" id="clear-button" class="button button-danger">
+            Clear all faces
+          </button>
+        </div>
+        <p id="import-error" class="error" role="alert" hidden></p>
+      </section>
+
+      <section id="view-spell" role="tabpanel" aria-labelledby="tab-spell" hidden>
+        <div id="spell-partial-warning" class="warning" hidden>
+          The inventory is incomplete — results are based on the faces recorded so far.
+        </div>
+        <label class="field-label" for="spell-input">Phrase to lay out</label>
+        <div class="spell-row">
+          <input
+            id="spell-input"
+            type="text"
+            placeholder="e.g. MERRY 🎄"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+          />
+          <button id="spell-go" class="button button-primary" type="button">Solve</button>
+        </div>
+        <div id="symbol-picker" class="symbol-picker" aria-label="Insert symbol"></div>
+        <p id="spell-error" class="error" role="alert" hidden></p>
+        <div id="spell-results"></div>
+      </section>
+
+      <section id="view-explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
+        <div id="explore-partial-warning" class="warning" hidden>
+          The inventory is incomplete — results are based on the faces recorded so far.
+        </div>
+        <p class="hint">
+          Finds every word and phrase (up to 4 words, using at most 16 blocks) that the recorded
+          faces can spell. Symbols count as single tokens. This can take a few seconds.
+        </p>
+        <div class="toolbar">
+          <button id="explore-run" class="button button-primary" type="button">Find phrases</button>
+          <button id="explore-cancel" class="button button-secondary" type="button" disabled>
+            Cancel
+          </button>
+          <span id="explore-status" class="status" role="status"></span>
+        </div>
+        <div id="explore-filters" class="filter-row" hidden>
+          <button type="button" data-filter="all" class="chip chip-active">All</button>
+          <button type="button" data-filter="phrases" class="chip">Phrases</button>
+          <button type="button" data-filter="words" class="chip">Single words</button>
+        </div>
+        <div id="explore-results"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Blocks are used at most once per phrase. Rows don't matter — lay them out however fits.</p>
+    </footer>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>

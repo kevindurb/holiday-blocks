@@ -1,0 +1,11 @@
+{
+  "name": "holiday-blocks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static web app for exploring what the family's 16 four-sided holiday blocks can spell.",
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1"
+  }
+}

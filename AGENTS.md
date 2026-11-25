@@ -1,7 +1,11 @@
-# <project>
+# holiday-blocks
 
-TODO: one paragraph — what this is, who it is for, and what it explicitly does
-not do.
+A small static web app for a family's set of 16 physical four-sided "holiday
+blocks". It records every face of every block (letters and topical symbols)
+and shows what the set can spell: a backtracking spell-checker for specific
+phrases, and a capped beam-search enumerator for everything spellable from a
+bundled word list. It is not a word game against an opponent, has no backend,
+and stores everything in the browser's localStorage.
 
 This repository started from the `base` template. It carries a GitHub-native
 OpenSpec factory as the default feature workflow: an issue opens a change, and
@@ -24,18 +28,13 @@ Everything runs through `just`.
 | `just test` | Test suite |
 | `just pre-commit` | Hook phase: `fmt lint` |
 | `just pre-push` | Hook phase: `build test` |
-| `just ci` | What CI runs |
+| `just ci` | What CI runs: `fmt lint build test spec-validate` |
 | `just install-hooks` | Point git at `.githooks` (once per clone) |
 | `just spec-list` | List OpenSpec changes |
 | `just spec-validate` | Validate every spec and change |
-| `just check-template` | Template-only scaffolding check (`base` uses this as `ci`) |
 
-The four checks are stubs until the project fills them in. Run `just ci` before
-reporting any task complete. If a check fails, fix the code, not the check.
-
-A derived project switches to `ci: pre-commit pre-push spec-validate` once its
-real checks exist. `base` keeps `ci: check-template` because it has no
-application to build or test.
+Run `just ci` before reporting any task complete. If a check fails, fix the
+code, not the check.
 
 ## Hooks
 
