@@ -38,7 +38,7 @@
 ## 7. Deployment
 
 - [x] 7.1 Add the GitHub Actions workflow that runs `just ci` and publishes the site to GitHub Pages on push to `main`; verify the workflow is syntactically valid (actionlint) and pages settings/docs are noted in README
-- [ ] 7.2 End-to-end check after merge: site loads on its Pages URL and a full enter-inventory → spell → enumerate cycle works (requires the deploy workflow to have run on `main`; the app itself is verified locally)
+- [x] 7.2 End-to-end check after merge: site loads on its Pages URL and a full enter-inventory → spell → enumerate cycle works (verified on the live Pages site: enter-inventory → spell → enumerate all work, zero console errors)
 
 ## Workflow follow-up
 
