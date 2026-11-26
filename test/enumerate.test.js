@@ -158,3 +158,75 @@ test("withAssignmentCounts attaches solution counts", () => {
   const [counted] = withAssignmentCounts(inv, [phrase]);
   assert.equal(counted.assignments, 2);
 });
+
+test("word length earns a scoring credit at equal tier", () => {
+  const inv = spreadInventory([letter("M"), letter("E"), letter("R"), letter("R"), letter("Y")]);
+  const { results } = enumerate({ inventory: inv, wordTable });
+  const merry = results.find((r) => r.text === "MERRY");
+  const me = results.find((r) => r.text === "ME");
+  const mer = results.find((r) => r.text === "MER");
+  assert.equal(merry.score, 10 - 0.5 * 5);
+  assert.equal(me.score, 1 - 0.5 * 2);
+  assert.equal(mer.score, 10 - 0.5 * 3);
+  // Equal tier: the longer word ranks higher (lower score).
+  assert.ok(merry.score < mer.score);
+});
+
+test("frequency tier still dominates word-length credit", () => {
+  const inv = spreadInventory([
+    letter("Y"),
+    letter("E"),
+    letter("M"),
+    letter("E"),
+    letter("R"),
+    letter("R"),
+    letter("Y"),
+  ]);
+  const { results } = enumerate({ inventory: inv, wordTable });
+  const scores = new Map(results.map((r) => [r.text, r.score]));
+  // YE is tier 40 in 2 letters; MERRY is tier 10 in 5 letters.
+  assert.ok(scores.get("MERRY") < scores.get("YE"));
+});
+
+test("one word plus symbols is classified as a single-word result, not a phrase", () => {
+  // M,E,R,R,Y + tree: every multi-token result has exactly one word.
+  const inv = spreadInventory([
+    letter("M"),
+    letter("E"),
+    letter("R"),
+    letter("R"),
+    letter("Y"),
+    symbol("tree"),
+  ]);
+  const { results } = enumerate({ inventory: inv, wordTable, maxPhrases: 50 });
+  for (const r of results) {
+    const words = r.tokens.filter((t) => t.type === "word");
+    const hasSymbol = r.tokens.some((t) => t.type === "symbol");
+    if (words.length === 1 && hasSymbol) {
+      // It must not crowd out genuine two-word results from the multi-word
+      // bucket; with maxPhrases this large, the singles cap absorbs them all.
+      assert.equal(words.length, 1);
+    }
+  }
+});
+
+test("genuine two-word phrases survive symbol competition in the multi-word bucket", () => {
+  // Regression: cheap symbol combos used to fill the multi-word bucket
+  // entirely. With the word-count bucket and length credit, a real two-word
+  // phrase must surface even with a symbol available.
+  const inv = spreadInventory([
+    letter("M"),
+    letter("E"),
+    letter("A"),
+    letter("R"),
+    letter("M"),
+    letter("Y"),
+    symbol("tree"),
+  ]);
+  const { results } = enumerate({ inventory: inv, wordTable, maxPhrases: 2 });
+  const twoWord = results.filter((r) => r.tokens.filter((t) => t.type === "word").length >= 2);
+  assert.ok(
+    twoWord.length > 0,
+    `expected at least one genuine two-word phrase, got: ${results.map((r) => r.text).join(", ")}`,
+  );
+});

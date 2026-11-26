@@ -12,6 +12,7 @@ export const MAX_BLOCKS = 16;
 export const DEFAULT_MAX_PHRASES = 200;
 export const DEFAULT_NODE_BUDGET = 2_000_000;
 export const BEAM_WIDTH = 400;
+export const WORD_LENGTH_WEIGHT = 0.5;
 
 const A = "a".charCodeAt(0);
 
@@ -173,7 +174,8 @@ export function enumerate({
       text: phraseText(state.tokens),
       score: state.score,
     };
-    pushTo(state.tokens.length >= 2 ? multis : singles, record);
+    const wordCount = state.tokens.reduce((n, token) => (token.type === "word" ? n + 1 : n), 0);
+    pushTo(wordCount >= 2 ? multis : singles, record);
   }
 
   // Beam search by depth: each level keeps the BEAM_WIDTH best-scoring
@@ -215,7 +217,7 @@ export function enumerate({
       const worst = next.worst();
       for (const entry of table) {
         if (entry.length > state.lettersLeft) continue;
-        const baseScore = state.score + entry.tier + entry.length * 0.1;
+        const baseScore = state.score + entry.tier - entry.length * WORD_LENGTH_WEIGHT;
         if (baseScore >= worst) continue; // cannot crack the beam
         const pairs = entry.pairs;
         let countsOk = true;
