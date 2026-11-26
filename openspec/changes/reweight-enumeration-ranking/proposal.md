@@ -12,7 +12,7 @@ The root cause is the score function `tier + 0.1 × length` combined with symbol
 - **Ranking rewards block usage**: per-word score becomes `tier − 0.5 × wordLength` (was `tier + 0.1 × wordLength`). Longer words at the same frequency tier rank higher, so phrases that use more blocks surface first.
 - **Singles reweighted too**: the same score applies to single-word results (longer common words rank above shorter ones at equal tier). Frequency tier still dominates length (a tier step is ~10 points; the length effect is ≤ ~8 points within one tier band), so common words still outrank rare words.
 - **Symbols are capped and costed** (added during implementation review): at most one symbol per phrase, and each symbol contributes a small fixed cost (`+5`) instead of `+0.1`. With 7 symbol faces in a real inventory, near-free symbols consumed the entire multi-word beam, so *zero* genuine two-word phrases were produced; the owner then chose cost 5 over 10 after seeing that ~7+ erases symbols entirely and ~5 decorates every phrase but keeps them all. Cap unchanged.
-- No changes to enumeration breadth, beam width (400), bucket cap (150 per class), word list, or the UI; `maxPhrases`, result caps and the worker protocol stay as they are.
+- No changes to the word list or UI structure. Cap values were raised by owner direction after the first deploy: `beamWidth` is now an `enumerate` option (default 400) and the app requests 1500, with `maxPhrases` 1500 — measured on the owner's real 16-block inventory: ~3000 results in ~10 s (vs 300 at ~3 s).
 
 ## Capabilities
 

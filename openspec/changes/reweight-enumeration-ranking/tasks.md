@@ -6,6 +6,7 @@
 - [x] 1.2 In `enumerate()`'s `consider()`, classify a result as multi-word only when it contains ≥2 word tokens (symbols do not count); verify with a targeted unit test that one-word+symbol results land in the singles class
 - [x] 1.3 Add unit tests in `test/enumerate.test.js` covering: two-word results present for a synthetic inventory where previously none appeared; at equal tier the longer word ranks first; a full tier step outranks a length advantage; one-word-plus-symbol is not classified as a multi-word phrase; `just test` passes
 - [x] 1.4 (Added after measurement on a real 7-symbol inventory) Add `SYMBOL_COST = 5` and `MAX_SYMBOLS_PER_PHRASE = 1`: symbol branch scores `+SYMBOL_COST` (replacing the flat 0.1) and a state that already holds a symbol may not gain another; add unit tests (max one symbol per result, symbol-cost scoring arithmetic, a ≥2-word phrase is found even with a 7-symbol-face inventory); verify `just test` passes
+- [x] 1.5 (Owner follow-up: "crank it up") Add `beamWidth` as an `enumerate` option (default `BEAM_WIDTH`); worker forwards `msg.beamWidth`; the app requests `maxPhrases: 1500` and `beamWidth: 1500` so both buckets fill past 1500 (measured ~3000 results in ~11s on the real inventory); verified via the worker code path end-to-end
 
 ## 2. Diagnostic check against realistic data
 

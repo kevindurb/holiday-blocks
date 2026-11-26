@@ -137,6 +137,7 @@ export function enumerate({
   inventory,
   wordTable,
   maxPhrases = DEFAULT_MAX_PHRASES,
+  beamWidth = BEAM_WIDTH,
   nodeBudget = DEFAULT_NODE_BUDGET,
   shouldCancel = () => false,
   onProgress = null,
@@ -200,7 +201,7 @@ export function enumerate({
   ];
 
   while (beam.length > 0 && !truncated) {
-    const next = makeBeam(BEAM_WIDTH);
+    const next = makeBeam(beamWidth);
     for (const state of beam) {
       if (shouldCancel()) {
         truncated = true;

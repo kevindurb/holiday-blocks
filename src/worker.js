@@ -1,5 +1,5 @@
 // Web Worker: runs the enumerator off the main thread.
-// Messages in:  { type: "start", inventory, wordsText, maxPhrases? }
+// Messages in:  { type: "start", inventory, wordsText, maxPhrases?, beamWidth? }
 //               { type: "cancel" }
 // Messages out: { type: "progress", nodes, found }
 //               { type: "done", results, nodes, truncated }
@@ -22,6 +22,7 @@ self.onmessage = (event) => {
       inventory: msg.inventory,
       wordTable,
       maxPhrases: msg.maxPhrases ?? 200,
+      beamWidth: msg.beamWidth,
       shouldCancel: () => Boolean(self.__cancelled),
       onProgress: (progress) => self.postMessage({ type: "progress", ...progress }),
     });

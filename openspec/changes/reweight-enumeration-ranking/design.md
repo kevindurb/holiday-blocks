@@ -21,9 +21,8 @@ Goals:
 - After this change, the multi-word bucket contains genuine multi-word phrases.
 - Ranking prefers phrases/words that use more blocks at equal frequency tier.
 Goals excluded:
-- No change to beam width, caps, node budget, or the word list.
-- No UI changes (the `improve-explore-filters` toolbar already exposes
-  min-words / min-letters; those become useful once phrases exist).
+- No changes to the word list or the UI structure.
+- Enumeration budget was deliberately raised at owner request (see Decision 6).
 - No attempt at grammatical phrase quality beyond frequency × length.
 
 ## Decisions
@@ -93,6 +92,18 @@ multi; (c) at equal tier a longer word ranks first; (d) tier dominates length;
 top results pre-fix are symbol combos. Plus a manual run of the real app on
 the deployed site (this project's established verification path).
 
+**6. Raise the result cap and beam width (owner request "crank it up").**
+`maxPhrases` passed by the app goes 150 → 1500 per bucket; `beamWidth` is
+now an `enumerate` option (default `BEAM_WIDTH` = 400) and the worker/UI pass
+1500. Measured on the real 16-block inventory: 3000 results total in ~10–11s
+(including assignment counting), vs 300 in ~3s before; the extra tail is
+longer tier-10 words, not garbage, and beam nodes stay far below the 2M
+budget. Alternatives considered: cap-only increase (plateaus at ~1196 results
+— beam-limited), beam 800/cap 1500 (2300 results, ~5.4s — rejected as not
+"cranked" enough), beam 2500/cap 2000 (~18s — too slow for an interactive
+page). Risks: ~10 s "Searching…" wait and ~3000 DOM rows; accepted for a
+personal tool, flagged to the owner.
+
 ## Risks / Trade-offs
 
 - [Cost 5 means essentially every phrase carries one symbol] → Owner's
@@ -108,6 +119,9 @@ the deployed site (this project's established verification path).
 - [Score can go low for very long low-tier words, e.g. tier-50 × ~30 letters
   → negative] → Harmless: lower is still better; nothing downstream assumes
   positivity.
+- [~10s enumeration and ~3000 rendered rows after raising caps] → Accepted
+  by owner; if it feels sluggish, the knobs are `beamWidth` and
+  `maxPhrases` in `src/ui/explore.js`.
 - [Ranking change is invisible to `just test` beyond unit tests; real-world
   feel needs the live inventory] → Verify on the deployed site after ship;
   keep wordlist fixed.

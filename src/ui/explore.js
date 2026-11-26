@@ -211,7 +211,8 @@ export function initExploreView(ctx) {
       type: "start",
       inventory: ctx.getInventory(),
       wordsText,
-      maxPhrases: 150,
+      maxPhrases: 1500,
+      beamWidth: 1500,
     });
   });
 
