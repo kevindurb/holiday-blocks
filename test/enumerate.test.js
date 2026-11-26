@@ -6,6 +6,7 @@ import {
   enumerate,
   parseWordlist,
   withAssignmentCounts,
+  SYMBOL_COST,
 } from "../src/enumerate.js";
 import { createEmptyInventory } from "../src/model.js";
 
@@ -260,7 +261,7 @@ test("a symbol costs SYMBOL_COST points", () => {
   ]);
   const { results } = enumerate({ inventory: inv, wordTable });
   const withSymbol = results.find((r) => r.text === "MERRY 🎄");
-  assert.equal(withSymbol.score, 10 - 0.5 * 5 + 10);
+  assert.equal(withSymbol.score, 10 - 0.5 * 5 + SYMBOL_COST);
 });
 
 test("genuine two-word phrases surface even with many symbol faces", () => {

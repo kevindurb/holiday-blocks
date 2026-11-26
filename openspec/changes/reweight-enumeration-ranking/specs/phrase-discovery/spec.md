@@ -18,7 +18,7 @@ The enumeration SHALL classify a result as a multi-word phrase only when it cont
 - **THEN** the multi-word result set contains genuine multi-word phrases and is not exclusively composed of single-word-plus-symbol combinations
 
 ### Requirement: Ranking rewards block usage
-The enumeration SHALL rank results so that, at equal word-frequency tier, candidates whose words are longer (consuming more blocks) rank higher. Frequency tier SHALL remain dominant across tiers: a lower tier SHALL always outrank a higher tier regardless of word length. Symbol tokens SHALL NOT provide a meaningful ranking advantage over words (they remain near-free decorations).
+The enumeration SHALL rank results so that, at equal word-frequency tier, candidates whose words are longer (consuming more blocks) rank higher. Frequency tier SHALL remain dominant across tiers: a lower tier SHALL always outrank a higher tier regardless of word length. Symbol tokens SHALL carry only a small fixed score cost, never enough to outrank words on their own.
 
 #### Scenario: Longer words win at equal tier
 - **WHEN** two results contain words of the same frequency tier but different total length
@@ -37,12 +37,12 @@ The enumeration SHALL rank results so that, at equal word-frequency tier, candid
 - **THEN** it does not outrank a two-word result that uses comparable blocks
 
 ### Requirement: Symbol tokens are limited and costly
-A phrase SHALL contain at most one symbol token, and each symbol token SHALL add a fixed score cost comparable to a common short word (not near-zero). Symbols remain available as optional decoration on phrases.
+A phrase SHALL contain at most one symbol token, and each symbol token SHALL add a small fixed score cost (less than one frequency tier step) so that symbol decoration never dominates the ranking, while still letting symbol-decorated results appear.
 
 #### Scenario: Symbol cap enforced
 - **WHEN** a phrase already contains one symbol token
 - **THEN** no further symbol token is added to that phrase
 
-#### Scenario: Symbols cost a real word's score
+#### Scenario: Decorated phrase ranks behind its plain counterpart
 - **WHEN** comparing a word-only phrase against the same phrase carrying one symbol
 - **THEN** the symbol-carrying phrase ranks behind its word-only counterpart at equal block usage of the words

@@ -35,25 +35,32 @@ a phrase. Alternative considered: keep token-count bucketing and only reprice
 symbols — rejected, because any near-free word remains beatable by symbol
 stacking regardless of weight, and a phrase is defined by having words.
 
-**2. Score `tier − 0.5 × wordLength` per word; symbols are costed and capped.**
+**2. Score `tier − 0.5 × wordLength` per word; symbols are capped and gently costed.**
 Length contributes −0.5 per letter: at equal tier, longer words win
 (e.g. tier-10 `QUICKLY` (7) = 6.5 vs `IF` (2) = 9.0). Tier dominance is
 preserved: one tier step (10) exceeds the maximum length effect any realistic
 span of lengths can produce within a pair comparison (the gap between two
 words is at most ~16 letters ≈ 8 points < 10), so ordering between tiers
-never flips. Symbol tokens cost a fixed ~10 (comparable to a common short
-word) and a phrase may carry at most one — see Decision 5; "symbols free"
-was measured to annihilate genuine multi-word phrases when 7 symbol faces
-are present.
+never flips. Symbol tokens carry a small fixed cost and a phrase may carry
+at most one — see Decisions 2 and 5. "Symbols free" was measured to
+annihilate genuine multi-word phrases when 7 symbol faces are present
+(symbol continuations starve the beam), and "symbols cost ~10" (a common
+word's tier) was measured to exclude symbols from results entirely — the
+owner then chose cost 5, accepting that multi-word results lean on symbol
+decoration; every multi-word result carries one symbol at this price.
 Alternatives considered:
 - `tier + 0.1·len` (original): short-word bias — rejected (the bug itself).
 - Symbols free (+0.1), as originally deployed in this change: on the real
   7-symbol inventory this produced zero genuine two-word phrases in the
   150-entry multi-word bucket — the beam fills with symbol continuations.
   Rejected after measurement.
-- Symbol cost ~5: phrases appear but symbol-decorated long words still ride
-  near the top; also measured. Partially works, still noisy.
-- Symbol cost ~25+: symbols vanish from results almost entirely.
+- Symbol cost ~5..6: measured — every multi-word result becomes decorated
+  (all 150) but phrases survive and the `includes a symbol` filter works.
+  CHOSEN (owner's call after seeing the measurements).
+- Symbol cost ~7+: symbols vanish from the top-150 entirely; the filter
+  stays empty — measured, rejected.
+- Symbol cost ~25+: same endpoint, further out.
+- Symbol cost ~0.1 (original): total phrase starvation. Rejected.
 - Per-block credit on symbols as well: maximal-block symbol stuffing
   ("QUICKLY 🎄 SO"); rejected by measurement.
 
@@ -65,19 +72,17 @@ tiers, and `improve-explore-filters` gives users the min/max levers if they
 prefer short words.
 
 **4. Implementation is a handful of surgical edits in `src/enumerate.js`.**
-Named constants `WORD_LENGTH_WEIGHT` (0.5), `SYMBOL_COST` (10),
+Named constants `WORD_LENGTH_WEIGHT` (0.5), `SYMBOL_COST` (5),
 `MAX_SYMBOLS_PER_PHRASE` (1); one-line score changes in the word and symbol
 branches; the word-count predicate in `consider()`; a guard against adding a
 second symbol to a state that already holds one. No signature changes; worker
 and UI untouched.
 
 **5. Cap one symbol per phrase.**
-Even with a ~10-point cost, capping symbols at one per phrase bounds the
-"free decoration" surface and guarantees symbol branching cannot monopolize
-the beam at any depth. Phrase semantics stay simple: a phrase is words plus
-optionally one glyph. Cost and cap were validated together against the real
-inventory: 150/150 two-word phrases in the multi bucket, clean output,
-runtime unchanged at ~2s.
+The cost (5) fixes beam starvation; the cap bounds the decoration surface —
+at most one glyph per phrase. Cost and cap were validated together against
+the real 7-symbol inventory: 150/150 genuine two-word phrases, zero more
+than one symbol, runtime ~3.5s.
 
 ## Verification plan
 
@@ -90,10 +95,11 @@ the deployed site (this project's established verification path).
 
 ## Risks / Trade-offs
 
-- [Symbol cost ~10 makes multi-word phrases dominate and shrinks symbol-only
-  appearances] → Intended trade-off per measurement; if real-world output
-  feels too clean, dropping `SYMBOL_COST` toward ~5 or raising the cap is a
-  one-line change with existing tests to catch regressions.
+- [Cost 5 means essentially every phrase carries one symbol] → Owner's
+  explicit choice after seeing all-or-nothing measurements; if it grates,
+  raising SYMBOL_COST to ~7 yields clean phrases at the price of losing
+  symbol results entirely, or a symbol slot quota in the bucket is the
+  follow-up (kept as a note, not implemented).
 - [Long-word bias makes "THE QUICK" style short phrases rank lower] → That is
   the requested behavior; min-words/min-letters filters give the user control.
 - [Bucket reclassification reshuffles everything shown in Explore] → Expected;

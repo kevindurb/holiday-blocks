@@ -13,11 +13,12 @@ export const DEFAULT_MAX_PHRASES = 200;
 export const DEFAULT_NODE_BUDGET = 2_000_000;
 export const BEAM_WIDTH = 400;
 export const WORD_LENGTH_WEIGHT = 0.5;
-// Symbols are usable as phrase decoration, but near-zero cost lets them
-// swamp the multi-word bucket (a word+symbol continuation always beats a
-// word+word continuation), so a symbol costs roughly a common word's tier
-// and at most one symbol is allowed per phrase.
-export const SYMBOL_COST = 10;
+// Symbols decorate phrases but still shouldn't ride for free: a token costs
+// half a frequency-tier step, chosen so phrases carrying a symbol remain
+// competitive (at ~10 symbols vanished from results entirely; at ~3, every
+// phrase was symbol-saturated regardless — the owner opted for the former).
+// At most one symbol is allowed per phrase.
+export const SYMBOL_COST = 5;
 export const MAX_SYMBOLS_PER_PHRASE = 1;
 
 const A = "a".charCodeAt(0);
