@@ -35,3 +35,14 @@ The enumeration SHALL rank results so that, at equal word-frequency tier, candid
 #### Scenario: Symbols do not outrank worthier phrases
 - **WHEN** a result combines one word with symbols
 - **THEN** it does not outrank a two-word result that uses comparable blocks
+
+### Requirement: Symbol tokens are limited and costly
+A phrase SHALL contain at most one symbol token, and each symbol token SHALL add a fixed score cost comparable to a common short word (not near-zero). Symbols remain available as optional decoration on phrases.
+
+#### Scenario: Symbol cap enforced
+- **WHEN** a phrase already contains one symbol token
+- **THEN** no further symbol token is added to that phrase
+
+#### Scenario: Symbols cost a real word's score
+- **WHEN** comparing a word-only phrase against the same phrase carrying one symbol
+- **THEN** the symbol-carrying phrase ranks behind its word-only counterpart at equal block usage of the words

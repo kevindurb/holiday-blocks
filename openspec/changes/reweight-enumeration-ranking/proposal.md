@@ -4,13 +4,14 @@
 
 The Explore view's multi-word results are effectively broken: every multi-word slot in the enumeration output is filled by `word + symbol` combinations, so genuine two-word phrases never appear at all (measured on a synthetic 16-block inventory: 150 singles, 95 word+symbol, 55 word+2-symbol, **zero** actual multi-word phrases). Users asking for phrase results (e.g. "min words = 2") get silence, and the single-word list is dominated by short, frequent words while longer, more block-efficient words rank below them despite equally good frequency tiers.
 
-The root cause is the score function `tier + 0.1 × length` combined with symbol tokens costing only `0.1`: symbol combos always undercut real phrases (a word+symbol scores ~10.3; the cheapest two-word phrase is ~20.4), so the 150-slot multi-word bucket saturates with symbol combos before any two-word phrase is even considered.
+The root cause is the score function `tier + 0.1 × length` combined with symbol tokens costing only `0.1`: symbol combos always undercut real phrases (a word+symbol scores ~10.3; the cheapest two-word phrase is ~20.4), so the 150-slot multi-word bucket saturates with symbol combos before any two-word phrase is even considered. Verification against a real 16-block inventory (7 symbol faces) showed the multi-word bucket contained zero genuine two-word phrases at all — symbol continuations also starve the beam itself, so phrases never reach the bucket.
 
 ## What Changes
 
 - **Multi-word bucket is word-count based, not token based**: a result lands in the multi-word bucket only when it contains at least two word tokens. Symbol tokens no longer let an entry qualify as a phrase.
-- **Ranking rewards block usage**: per-word score becomes `tier − 0.5 × wordLength` (was `tier + 0.1 × wordLength`). Longer words at the same frequency tier rank higher, so phrases that use more blocks surface first. Symbol tokens keep their ~free `0.1` cost.
+- **Ranking rewards block usage**: per-word score becomes `tier − 0.5 × wordLength` (was `tier + 0.1 × wordLength`). Longer words at the same frequency tier rank higher, so phrases that use more blocks surface first.
 - **Singles reweighted too**: the same score applies to single-word results (longer common words rank above shorter ones at equal tier). Frequency tier still dominates length (a tier step is ~10 points; the length effect is ≤ ~8 points within one tier band), so common words still outrank rare words.
+- **Symbols are capped and costed** (added during implementation review): at most one symbol per phrase, and each symbol contributes `+10` (roughly one common-word tier) instead of `+0.1`. With 7 symbol faces in a real inventory, near-free symbols consumed the entire multi-word beam, so *zero* genuine two-word phrases were produced; with the cost they no longer crowd out word continuations, and the cap keeps symbol stacking from padding scores.
 - No changes to enumeration breadth, beam width (400), bucket cap (150 per class), word list, or the UI; `maxPhrases`, result caps and the worker protocol stay as they are.
 
 ## Capabilities

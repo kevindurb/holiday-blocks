@@ -5,6 +5,7 @@
 - [x] 1.1 In `src/enumerate.js`, introduce a named `WORD_LENGTH_WEIGHT` constant (0.5) and change the word branch of the beam to `state.score + entry.tier − entry.length * WORD_LENGTH_WEIGHT`; leave the symbol branch unchanged; verify by reading the diff and running `just test` (existing tests still pass, no behavior of symbol scoring touched)
 - [x] 1.2 In `enumerate()`'s `consider()`, classify a result as multi-word only when it contains ≥2 word tokens (symbols do not count); verify with a targeted unit test that one-word+symbol results land in the singles class
 - [x] 1.3 Add unit tests in `test/enumerate.test.js` covering: two-word results present for a synthetic inventory where previously none appeared; at equal tier the longer word ranks first; a full tier step outranks a length advantage; one-word-plus-symbol is not classified as a multi-word phrase; `just test` passes
+- [x] 1.4 (Added after measurement on a real 7-symbol inventory) Add `SYMBOL_COST = 10` and `MAX_SYMBOLS_PER_PHRASE = 1`: symbol branch scores `+SYMBOL_COST` (replacing the flat 0.1) and a state that already holds a symbol may not gain another; add unit tests (max one symbol per result, symbol-cost scoring arithmetic, a ≥2-word phrase is found even with a 7-symbol-face inventory); verify `just test` passes
 
 ## 2. Diagnostic check against realistic data
 

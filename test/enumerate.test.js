@@ -230,3 +230,58 @@ test("genuine two-word phrases survive symbol competition in the multi-word buck
     `expected at least one genuine two-word phrase, got: ${results.map((r) => r.text).join(", ")}`,
   );
 });
+
+test("a phrase never contains more than one symbol", () => {
+  const inv = spreadInventory([
+    letter("M"),
+    letter("E"),
+    letter("R"),
+    letter("R"),
+    letter("Y"),
+    symbol("tree"),
+    symbol("heart"),
+    symbol("four"),
+  ]);
+  const { results } = enumerate({ inventory: inv, wordTable });
+  for (const r of results) {
+    const symbols = r.tokens.filter((t) => t.type === "symbol");
+    assert.ok(symbols.length <= 1, `too many symbols in: ${r.text}`);
+  }
+});
+
+test("a symbol costs SYMBOL_COST points", () => {
+  const inv = spreadInventory([
+    letter("M"),
+    letter("E"),
+    letter("R"),
+    letter("R"),
+    letter("Y"),
+    symbol("tree"),
+  ]);
+  const { results } = enumerate({ inventory: inv, wordTable });
+  const withSymbol = results.find((r) => r.text === "MERRY 🎄");
+  assert.equal(withSymbol.score, 10 - 0.5 * 5 + 10);
+});
+
+test("genuine two-word phrases surface even with many symbol faces", () => {
+  const letters = "ETAOINSHRDLUETAOINSHRDLUCMFWGYPBVKJXQZ";
+  const inv = createEmptyInventory();
+  const faces = [...letters].map((ch) => letter(ch));
+  for (let b = 0; b < 16; b += 1) {
+    inv.blocks[b].faces = faces.slice(b * 4, b * 4 + 4);
+  }
+  inv.blocks[15].faces[3] = symbol("tree");
+  inv.blocks[0].faces[3] = symbol("heart");
+  inv.blocks[3].faces[1] = symbol("four");
+  inv.blocks[6].faces[2] = symbol("usa");
+  inv.blocks[9].faces[0] = symbol("flowers");
+  inv.blocks[12].faces[3] = symbol("shamrock");
+  inv.blocks[14].faces[1] = symbol("pineapple");
+  const { results } = enumerate({
+    inventory: inv,
+    wordTable: buildWordTable(words),
+    maxPhrases: 150,
+  });
+  const twoWord = results.filter((r) => r.tokens.filter((t) => t.type === "word").length >= 2);
+  assert.ok(twoWord.length > 0, "expected at least one genuine two-word phrase");
+});

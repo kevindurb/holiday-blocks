@@ -13,6 +13,12 @@ export const DEFAULT_MAX_PHRASES = 200;
 export const DEFAULT_NODE_BUDGET = 2_000_000;
 export const BEAM_WIDTH = 400;
 export const WORD_LENGTH_WEIGHT = 0.5;
+// Symbols are usable as phrase decoration, but near-zero cost lets them
+// swamp the multi-word bucket (a word+symbol continuation always beats a
+// word+word continuation), so a symbol costs roughly a common word's tier
+// and at most one symbol is allowed per phrase.
+export const SYMBOL_COST = 10;
+export const MAX_SYMBOLS_PER_PHRASE = 1;
 
 const A = "a".charCodeAt(0);
 
@@ -256,6 +262,12 @@ export function enumerate({
           }
         }
         if (placedBlock === -1) continue;
+        if (
+          state.tokens.reduce((n, t) => (t.type === "symbol" ? n + 1 : n), 0) >=
+          MAX_SYMBOLS_PER_PHRASE
+        ) {
+          continue;
+        }
         next.push({
           tokens: [...state.tokens, { type: "symbol", value: symbol }],
           remaining: state.remaining,
@@ -263,7 +275,7 @@ export function enumerate({
           lettersLeft: state.lettersLeft,
           wordCount: state.wordCount,
           blocksUsed: state.blocksUsed + 1,
-          score: state.score + 0.1,
+          score: state.score + SYMBOL_COST,
         });
       }
     }
